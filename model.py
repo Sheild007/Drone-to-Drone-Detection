@@ -1,39 +1,3 @@
-"""
-HeatmapGuidedDetector — standalone model definition
-Extracted from the Phase 3 Kaggle notebook.
-
-Architecture overview
----------------------
-3 consecutive RGB frames (T=3, 640x640)
-    → EfficientNet-B0 per-frame feature extraction
-    → TemporalFusion (1x1 conv over concatenated frames per FPN level)
-    → 3-layer BiFPN (64 ch) → P1 (stride 4, 160x160), P2, P3, P4
-    → YOLOMG-style motion difference maps → MotionEncoder → fused into HeatmapHead
-    → Gaussian heatmap logits (B, 1, 160, 160)
-    → Top-K=50 peak extraction (3x3 NMS, no_grad)
-    → Multi-level ROIAlign on P1/P2/P3 at each peak (11x11 grid)
-    → RefinementHead MLP → objectness + (dx, dy, dw, dh)
-
-Phase 3 changes vs earlier variants
--------------------------------------
-- Adaptive Gaussian sigma: σ = max(min(w,h)/3, 0.5) in heatmap-pixel space
-  instead of fixed σ=2.0. Tighter supervision for sub-6-pixel targets.
-- Data-driven anchor: median GT box size computed from training labels (~5.93 px)
-  instead of a hand-picked 8 px or multi-anchor head.
-- DIoU assignment for ROI-GT matching (better for tiny, near-overlapping boxes).
-- DIoU box loss replaces Smooth L1 (phase 3 training only).
-- 11x11 ROIAlign grid (up from 7x7).
-- 35% epoch subsampling for more training diversity within GPU budget.
-
-Usage
------
-    from model import HeatmapGuidedDetector, CFG_DEFAULT
-
-    model = HeatmapGuidedDetector(CFG_DEFAULT)
-    # CFG_DEFAULT['anchor_size'] must be set from training data before use.
-    # See compute_data_driven_anchor_size() in the Phase 3 notebook (Cell 5).
-"""
-
 import math
 import torch
 import torch.nn as nn
