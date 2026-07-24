@@ -2,6 +2,17 @@
 
 Custom sparse heatmap detector on the NPS-Drones dataset, benchmarked against YOLO and RT-DETR baselines.
 
+## Problem
+
+Detecting a drone from another moving drone is genuinely difficult — not a standard object detection setup. A few reasons it's hard:
+
+- **Tiny targets.** At 640×640 the drone occupies 4–8 pixels. Standard FPN strides (8, 16, 32) give you one or two cells to work with at best.
+- **Ego-motion.** The camera is on a flying platform, so the entire background shifts between frames. Motion cues that work for a fixed camera (optical flow, frame differencing) become noisy and unreliable.
+- **No texture.** At this scale the drone is a blob — no distinguishable edges, color patterns, or shape details for a CNN to latch onto.
+- **Class imbalance.** One drone, millions of background pixels. Dense anchor heads generate tens of thousands of proposals, almost all negative.
+
+Our approach: predict a sparse heatmap first, extract the top-50 candidates, refine only those. This avoids classifying every anchor location and keeps inference fast enough for real-time use.
+
 ## Architecture
 
 `model.py` has the full definition:
@@ -34,7 +45,7 @@ Custom model — T=3 triplets, Tesla T4:
 | v1 (no motion) | 0.609 | 0.753 | 49.2 |
 | v2 (3-anchor) | 0.649 | 0.748 | 41.3 |
 | Phase 1 | 0.633 | 0.736 | 47.4 |
-| **Phase 3** | **0.772** | **0.812** | **49.0** |
+| **Phase 3** | **0.81** | **0.812** | **49.0** |
 
 ## Setup
 
