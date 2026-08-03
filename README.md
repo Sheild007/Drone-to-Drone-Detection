@@ -2,6 +2,8 @@
 
 Custom sparse heatmap detector on the NPS-Drones dataset, benchmarked against YOLO and RT-DETR baselines.
 
+![Demo: Detecting target drones in real-time from an ego drone](demo.gif)
+
 ## Why this matters
 
 As drones become more common in both commercial and military settings, the ability for one drone to detect another in real-time is critical for collision avoidance, swarm coordination, and counter-drone systems. Most detection research assumes a ground-based camera with a fixed background. Drone-to-drone detection is fundamentally different and considerably harder.
@@ -14,6 +16,8 @@ As drones become more common in both commercial and military settings, the abili
 - **Class imbalance.** One drone against millions of background pixels. Dense anchor heads generate tens of thousands of proposals, almost all negative.
 
 ## Our approach
+
+![Model Architecture](architecture.png)
 
 Instead of classifying every anchor location, we first narrow the search to a sparse set of candidates using a CenterNet-style heatmap, then refine only those ~50 candidates with ROIAlign and an MLP. This avoids wasting compute on obvious background and keeps inference fast.
 
