@@ -2,6 +2,8 @@
 
 Custom sparse heatmap detector on the NPS-Drones dataset, benchmarked against YOLO and RT-DETR baselines.
 
+**[Live demo on Hugging Face Spaces](https://huggingface.co/spaces/UsmanDauna/drone-to-drone-detection)** - watch pre-rendered detections or run the model on a short clip.
+
 ![Demo: Detecting target drones in real-time from an ego drone](demo.gif)
 
 ## Why this matters
@@ -54,6 +56,19 @@ Baselines for comparison (every 4th test frame, Tesla T4):
 | YOLO11m | 0.718 | 0.688 | 55.2 |
 | YOLO12s | 0.854 | 0.862 | 117.7 |
 | RT-DETRv1 | 0.913 | 0.893 | 22.3 |
+
+## Live demo
+
+The Phase 3 model is deployed as a Gradio app on Hugging Face Spaces (ZeroGPU): **https://huggingface.co/spaces/UsmanDauna/drone-to-drone-detection**
+
+- **Pre-rendered results** - detections on clips from the NPS-Drones test split, including one deliberately hard case.
+- **Try it live** - pick a sample clip or upload a short video (about 8 seconds). The model runs on a GPU that is attached only for the duration of the request.
+
+How the demo works:
+
+- It loads the PyTorch weights from the Phase 3 run (epoch 45 checkpoint) and applies the same preprocessing as training: letterbox to 640x640, ImageNet normalization, and the two absolute frame-difference motion maps.
+- Each prediction needs three consecutive frames, so the first two frames of a clip have no boxes. The detector can be run on every N-th frame, with the last boxes held in between.
+- The speeds in the tables above were measured on a Tesla T4. In the demo, total time per clip also includes video decoding, drawing and re-encoding, and ZeroGPU gives each visitor a small daily GPU allowance.
 
 ## Future work
 
